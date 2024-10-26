@@ -1,3 +1,6 @@
 .venv
 myenv
 logs.log
+.Trash-*
+.DS_Store
+.ipynb_checkpoints

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+ tech-challenge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/tech-challenge/
+    ports:
+      - "8888:8888"
