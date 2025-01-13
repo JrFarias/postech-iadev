@@ -1,4 +1,5 @@
 .venv
+venv
 myenv
 logs.log
 .Trash-*
