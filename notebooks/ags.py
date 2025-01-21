@@ -5,61 +5,17 @@ import altair as alt
 import matplotlib.pyplot as plt
 from IPython.display import display, clear_output
 
-
-def gerar_caminhoes():
-    caminhoes = []
-
-    for i in range(10):
-        caminhao = {
-            "id": i + 1,
-            "volume": 200,
-            "peso": 2000,
-            "volume_usado": 0,
-            "peso_usado": 0,
-            "valor_minimo": 4000,
-            "valor_total": 0
-        }
-        caminhoes.append(caminhao)
-    return caminhoes
-
-# Dados dos produtos (Fardo de Latas e Engradado de Garrafas)
-produtos = [
-    # Produto não refrigerado e prioridade baixa
-    {"id": 1, "nome": "Fardo de Latas", "volume": 0.2, "peso": 30, "valor": 150, "prioridade": "baixa"},
-    
-    # Produto não refrigerado e prioridade média
-    {"id": 2, "nome": "Engradado de Garrafas", "volume": 0.7, "peso": 25, "valor": 100, "prioridade": "média"},
-    
-    # Produto refrigerado e prioridade alta
-    {"id": 3, "nome": "Caixa de amendoin", "volume": 0.25, "peso": 10, "valor": 50, "prioridade": "baixa"},
-    
-    # Produto refrigerado e prioridade média
-    {"id": 4, "nome": "Caixa de vinho", "volume": 0.25, "peso": 15, "valor": 100, "prioridade": "média"},
-    
-    # Produto refrigerado e prioridade baixa
-    {"id": 5, "nome": "Caixa de chá gelado", "volume": 0.4, "peso": 12, "valor": 20, "prioridade": "baixa"},
-    
-    # Produto não refrigerado e prioridade baixa
-    {"id": 6, "nome": "Pacote de farinha de trigo", "volume": 0.5, "peso": 25, "valor": 35, "prioridade": "baixa"},
-]
-
-# Gerar uma lista de 900 produtos aleatórios
-def gerar_produtos_amostra():
-    np.random.seed(42)
-    produtos_amostra = [
-        {**random.choice(produtos), "id": i + 1} for i in range(900)
-    ]
-    return produtos_amostra
-
-
 class AlgoritmoGenetico:
 
-    def __init__(self, population_size=300, generations=50, mutation_rate=0.05, initial_population_method: str = "", selection_method: str = "", mutation_method: str = "", dynamic_mutation_active: bool = False):
+    def __init__(self, caminhoes, produtos_amostra, population_size=300, generations=50, mutation_rate=0.05, initial_population_method: str = "", selection_method: str = "", mutation_method: str = "", dynamic_mutation_active: bool = False):
+        
+        self.caminhoes = caminhoes
+        self.produtos_amostra = produtos_amostra
         self.population_size = population_size
         self.generations = generations
         self.mutation_rate = mutation_rate
-        self.caminhoes = gerar_caminhoes()
-        self.produtos_amostra = gerar_produtos_amostra()
+        
+        
         self.fitness_scores = {
             "generations": [],
             "best_fitness": [],
@@ -277,3 +233,30 @@ class AlgoritmoGenetico:
         ]
 
         return best_final_solution, max(final_fitness_scores), caminhoes_utilizados, fitness_history
+    
+def heuristica_gulosa(caminhoes, produtos):
+    # Ordenar produtos por valor/volume (ou outro critério)
+    produtos_ordenados = sorted(produtos, key=lambda p: p["valor"] / p["volume"], reverse=True)
+    
+    for caminhao in caminhoes:
+        for produto in produtos_ordenados[:]:  # Use uma cópia da lista para evitar problemas de modificação enquanto itera
+            if not produto.get("alocado", False):  # Verifica se o produto já foi alocado
+                if (
+                    produto["volume"] + caminhao["volume_usado"] <= caminhao["volume"]
+                    and produto["peso"] + caminhao["peso_usado"] <= caminhao["peso"]
+                ):
+                    # Adiciona o produto ao caminhão
+                    caminhao["volume_usado"] += produto["volume"]
+                    caminhao["peso_usado"] += produto["peso"]
+                    caminhao["valor_total"] += produto["valor"]
+
+                    # Marcar o produto como alocado
+                    produto["alocado"] = True  # Agora ele está alocado e não será considerado novamente
+                    
+                    # Remover produto alocado da lista de produtos
+                    produtos_ordenados.remove(produto)
+                
+
+    # Certifique-se de que a função retorne os caminhões
+    return caminhoes
+

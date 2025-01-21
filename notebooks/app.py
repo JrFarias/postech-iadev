@@ -1,219 +1,165 @@
 import streamlit as st
 from ags import AlgoritmoGenetico  # Certifique-se de que o módulo esteja no mesmo diretório ou no path correto
+import random
+import pandas as pd
+import numpy as np
+import utils
+from ags import heuristica_gulosa
 import matplotlib.pyplot as plt
 
-import numpy as np
-from collections import defaultdict
+def gerar_caminhoes(valor_minimo):
+    caminhoes = []
+    for i in range(10):
+        caminhao = {
+            "id": i + 1,
+            "volume": 200,
+            "peso": 2000,
+            "volume_usado": 0,
+            "peso_usado": 0,
+            "valor_minimo": valor_minimo,
+            "valor_total": 0,
+        }
+        caminhoes.append(caminhao)
+    return caminhoes
 
-# Função para exibir gráficos de ocupação de caminhões
-def exibir_graficos(caminhoes_utilizados):
-    # Dados para o gráfico de volume e peso ocupados
-    ids_caminhoes = [caminhao['id'] for caminhao in caminhoes_utilizados]
-    volumes_usados = [caminhao['volume_usado'] for caminhao in caminhoes_utilizados]
-    pesos_usados = [caminhao['peso_usado'] for caminhao in caminhoes_utilizados]
-    valores_totais = [caminhao['valor_total'] for caminhao in caminhoes_utilizados]
-    
-    # Gráfico de volume e peso ocupado
-    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
-    
-    # Volume usado por caminhão
-    ax[0].bar(ids_caminhoes, volumes_usados, color='blue', alpha=0.7)
-    ax[0].set_title('Volume Ocupado por Caminhão')
-    ax[0].set_xlabel('Caminhão')
-    ax[0].set_ylabel('Volume Ocupado (m³)')
-    
-    # Peso usado por caminhão
-    ax[1].bar(ids_caminhoes, pesos_usados, color='green', alpha=0.7)
-    ax[1].set_title('Peso Ocupado por Caminhão')
-    ax[1].set_xlabel('Caminhão')
-    ax[1].set_ylabel('Peso Ocupado (kg)')
-    
-    st.pyplot(fig)
 
-    # Gráfico de valor total da carga separado
-    fig2, ax2 = plt.subplots(figsize=(8, 5))
-    ax2.bar(ids_caminhoes, valores_totais, color='orange', alpha=0.7)
-    ax2.set_title('Valor Total da Carga por Caminhão')
-    ax2.set_xlabel('Caminhão')
-    ax2.set_ylabel('Valor Total (R$)')
+produtos = [
+    {"id": 1, "nome": "Fardo de Latas", "volume": 0.2, "peso": 30, "valor": 150, "prioridade": "baixa"},
+    {"id": 2, "nome": "Engradado de Garrafas", "volume": 0.7, "peso": 25, "valor": 100, "prioridade": "média"},
+    {"id": 3, "nome": "Caixa de amendoim", "volume": 0.25, "peso": 10, "valor": 50, "prioridade": "alta"},
+    {"id": 4, "nome": "Caixa de vinho", "volume": 0.25, "peso": 15, "valor": 100, "prioridade": "média"},
+    {"id": 5, "nome": "Caixa de chá gelado", "volume": 0.4, "peso": 12, "valor": 20, "prioridade": "baixa"},
+    {"id": 6, "nome": "Pacote de farinha de trigo", "volume": 0.5, "peso": 25, "valor": 35, "prioridade": "alta"},
+]
 
-    # Adicionar linha vermelha em Y=4000 para o limite mínimo de valor
-    ax2.axhline(y=4000, color='red', linestyle='--', label='Limite Mínimo (R$ 4000)')
 
-    # Adicionar legenda
-    ax2.legend(loc='upper right')
+def gerar_produtos_amostra():
+    np.random.seed(42)
+    produtos_amostra = [
+        {**np.random.choice(produtos), "id": i + 1} for i in range(900)
+    ]
+    return produtos_amostra
 
-    st.pyplot(fig2)
-
-    # Gráfico de eficiência de ocupação
-    eficiencia_volume = [caminhao['volume_usado'] / caminhao['volume'] * 100 for caminhao in caminhoes_utilizados]
-    eficiencia_peso = [caminhao['peso_usado'] / caminhao['peso'] * 100 for caminhao in caminhoes_utilizados]
-    
-    fig3, ax3 = plt.subplots(1, 2, figsize=(12, 5))
-
-    # Eficiência de volume
-    ax3[0].bar(ids_caminhoes, eficiencia_volume, color='blue', alpha=0.7)
-    ax3[0].set_title('Eficiência de Volume por Caminhão')
-    ax3[0].set_xlabel('Caminhão')
-    ax3[0].set_ylabel('Eficiência de Volume (%)')
-
-    # Eficiência de peso
-    ax3[1].bar(ids_caminhoes, eficiencia_peso, color='green', alpha=0.7)
-    ax3[1].set_title('Eficiência de Peso por Caminhão')
-    ax3[1].set_xlabel('Caminhão')
-    ax3[1].set_ylabel('Eficiência de Peso (%)')
-    
-    st.pyplot(fig3)
-
-# Função para mostrar a distribuição de produtos nos caminhões
-def exibir_distribuicao(caminhoes_utilizados):
-    for caminhao in caminhoes_utilizados:
-        st.write(f"Caminhão {caminhao['id']}:")
-        st.write(f"- Volume Usado: {caminhao['volume_usado']} m³")
-        st.write(f"- Peso Usado: {caminhao['peso_usado']} kg")
-        st.write(f"- Valor Total da Carga: R$ {caminhao['valor_total']}")
-        st.write("---")
-
-@st.cache_data
-def calcular_soma_por_produto(solution, produtos_amostra, caminhao_id, modo='volume'):
-    # 1. Somar (volume/peso/valor) de cada tipo de produto para este caminhão
-    soma_por_produto = defaultdict(float)
-    
-    total_valor = 0
-    for i, produto in enumerate(produtos_amostra):
-        if solution[i] == caminhao_id:
-            nome_produto = produto['nome']
-            if modo == 'volume':
-                soma_por_produto[nome_produto] += produto['volume']
-            elif modo == 'peso':
-                soma_por_produto[nome_produto] += produto['peso']
-            elif modo == 'valor':
-                soma_por_produto[nome_produto] += produto['valor']
-                total_valor += produto['valor']
-            else:
-                raise ValueError("O modo deve ser 'volume', 'peso' ou 'valor'.")
-
-    return soma_por_produto, total_valor
-
-@st.cache_data
-def gerar_grafico(soma_por_produto, modo, caminhao_id, colormap='tab20'):
-    # 2. Preparar dados para plotar
-    labels = list(soma_por_produto.keys())
-    valores = list(soma_por_produto.values())
-
-    # (Opcional) Ordenar as fatias de maior para menor
-    pares_ordenados = sorted(zip(labels, valores), key=lambda x: x[1], reverse=True)
-    labels, valores = zip(*pares_ordenados)  # reatribui as duas listas
-    
-    # 3. Escolher paleta de cores
-    cmap = plt.get_cmap(colormap)
-    cores = [cmap(i) for i in np.linspace(0, 1, len(labels))]
-
-    # 4. Criar gráfico de pizza + donut (disco de memória)
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={'aspect': 'equal'})
-
-    wedges, texts, autotexts = ax.pie(
-        valores, 
-        labels=labels,
-        autopct='%1.1f%%',
-        startangle=140,
-        colors=cores,
-        pctdistance=0.80,    # ajustar posição dos percentuais
-        labeldistance=1.05,  # ajustar posição dos rótulos
-        shadow=True,
-        wedgeprops={'edgecolor': 'white', 'linewidth': 1}
-    )
-
-    for autotext in autotexts:
-        autotext.set_color('white')
-        autotext.set_fontweight('bold')
-        autotext.set_size(10)
-
-    donut_central = plt.Circle((0, 0), 0.60, color='white')
-    ax.add_artist(donut_central)
-
-    # 5. Título do gráfico
-    title = f"Caminhão - {str(caminhao_id)}"
-    ax.set_title(title, fontsize=14, fontweight='bold', pad=20)
-
-    plt.tight_layout()
-    return fig
-
-def plot_discos_memoria_todos_caminhoes(solution, produtos_amostra, caminhoes, colormap='tab20'):
-    num_caminhoes = len(caminhoes)
-    num_colunas = 2  # Número de gráficos por linha
-    largura = 5  # Largura fixa do gráfico
-    altura = 4   # Altura fixa do gráfico
-    
-    # Organizar os gráficos em colunas
-    for i, caminhao in enumerate(caminhoes):
-        caminhao_id = caminhao['id']
-        
-        # Calcular soma por produto para valor (monetário)
-        soma_por_produto_valor, total_valor = calcular_soma_por_produto(solution, produtos_amostra, caminhao_id, modo='valor')
-
-        if soma_por_produto_valor:
-            # Organizar a exibição em 3 gráficos por linha
-            if i % num_colunas == 0:
-                colunas = st.columns(num_colunas)  # Divida a tela em 3 colunas
-            
-            # Exibir o resumo dos dados para o caminhão, acima do gráfico
-            colunas[i % num_colunas].write(f"### Resumo dos dados para o Caminhão {caminhao_id}:")
-            colunas[i % num_colunas].write(f"**Valor total da carga (monetário):** R${total_valor:.2f}")
-            
-            # Gerar gráfico de itens (somente valores monetários)
-            fig_valor = gerar_grafico(soma_por_produto_valor, modo='valor', colormap=colormap, caminhao_id=caminhao_id)
-            
-            # Ajustar o tamanho da figura para garantir que todos os gráficos tenham o mesmo tamanho
-            fig_valor.set_size_inches(largura, altura)
-            
-            # Exibir gráfico na coluna correta
-            colunas[i % num_colunas].pyplot(fig_valor)
-
-        else:
-            st.write(f"Nenhum produto alocado no caminhão {caminhao_id}.")
 
 def main():
-    st.title("Algoritmo Genético para Alocação de Produtos em Caminhões")
+    st.title("Otimização de Carga de Caminhões com Algoritmos Genéticos")
 
+    # Introdução e descrição dos parâmetros
+    st.subheader("Introdução ao Problema")
+    st.write("""
+    Este aplicativo utiliza algoritmos genéticos para resolver o problema de otimizar a carga de caminhões. 
+    Nosso objetivo é maximizar o valor total transportado respeitando as limitações de peso e volume de cada caminhão, 
+    bem como um valor mínimo de carga definido pelo usuário.
+    """)
+
+    st.subheader("Definição do Problema")
+    st.write("""
+    Este projeto aborda um problema real de logística: otimizar a distribuição de produtos em caminhões, de forma a maximizar o valor transportado respeitando as seguintes restrições:
+    - Cada caminhão tem um limite máximo de peso e volume.
+    - Os produtos transportados em cada caminhão devem atingir um valor mínimo configurado pelo usuário.
+    """)
+
+    st.image("knapsack.png")
+
+    st.write("""
+    **Objetivo:** Desenvolver um algoritmo genético que encontre a melhor configuração para atender às restrições acima, maximizando o valor transportado.
+
+    **Critérios de Sucesso:**
+    1. O algoritmo deve gerar soluções viáveis para o problema.
+    2. A solução deve ser comparada com métodos convencionais para demonstrar a eficácia do algoritmo genético.
+    3. A alocação dos itens deve respeitar as restrições iniciais:
+            - Não ultrapassar Volume.
+            - Não ultrapassar a Carga.
+            - Valor total da carga deve ser maior ou igual ao limite mínimo declarado (R$ 4000,00)
+    """)
+
+    # Entrada para valor mínimo dos caminhões
+    st.subheader("Configuração dos Caminhões")
+    valor_minimo = st.number_input(
+        "Valor Mínimo de Carga por Caminhão",
+        value=4000,
+        help="Define o valor mínimo que cada caminhão deve transportar para o problema de otimização."
+    )
+    
+    with st.expander("Parâmetros do Algoritmo Genético"):
+        st.info("""
+        **Descrição dos Parâmetros do Algoritmo Genético:**
+        - **Tamanho da População:** Representa o número de soluções possíveis que serão geradas em cada iteração. 
+        Populações maiores permitem maior exploração, mas aumentam o tempo de processamento.
+        Exemplo: Se forem 300 indivíduos, o algoritmo tentará 300 soluções por geração.
+        - **Número de Gerações:** Quantidade de ciclos de evolução para o algoritmo. 
+        Gerações maiores aumentam as chances de encontrar soluções ideais, mas podem ser mais lentas.
+        - **Taxa de Mutação:** Controla a probabilidade de alterações aleatórias nos indivíduos.
+        Por exemplo, uma taxa de 5% significa que 5% da população sofrerá mutações.
+        - **Método de Inicialização:** Define como a população inicial será gerada.
+        - `Random`: Soluções completamente aleatórias.
+        - `Heuristic`: Usa regras pré-definidas para criar soluções iniciais.
+        - **Método de Seleção:** Estratégia para escolher indivíduos para reprodução.
+        - `Roulette`: Baseado em probabilidade proporcional ao fitness.
+        - `Tournament`: Indivíduos competem, e o melhor é selecionado.
+        - **Método de Mutação:** Define como a alteração será feita.
+        - `Swap`: Troca posições de dois elementos.
+        - `Inversion`: Inverte uma sequência dentro de um indivíduo.
+        - `Substitution`: Substitui um elemento por outro.
+        - **Taxa de Mutação Dinâmica:** Permite ajustar a taxa de mutação conforme o algoritmo evolui. 
+        Por exemplo, a taxa pode diminuir nas gerações finais para evitar alterações indesejadas.
+        """)
+
+    caminhoes = gerar_caminhoes(int(valor_minimo))
+    produtos_amostra = gerar_produtos_amostra()
+
+    # Agregação do dataframe de produtos
+    produtos_df = pd.DataFrame(produtos_amostra)
+    produtos_agrupados = produtos_df.groupby("nome").agg(
+        quantidade=("id", "count"),
+        volume_unitario=("volume", "first"),
+        peso_unitario=("peso", "first"),
+        valor_unitario=("valor", "first"),
+        prioridade=("prioridade", "first")
+    ).reset_index()
+
+    st.write("### Caminhões:")
+    st.dataframe(pd.DataFrame(caminhoes), hide_index=True)
+
+    st.write("### Produtos Agrupados:")
+    st.dataframe(produtos_agrupados, hide_index=True)
+
+    # Configurações do algoritmo genético
     st.header("Configurações do Algoritmo Genético")
-
     col1, col2 = st.columns(2)
 
     with col1:
         population_size = st.slider(
-            "Tamanho da População", min_value=50, max_value=1000, step=50, value=300
+            "Tamanho da População", 50, 1000, 300, 50,
+            help="Número de indivíduos (soluções possíveis) em cada geração."
         )
         generations = st.slider(
-            "Número de Gerações", min_value=10, max_value=5000, step=10, value=50
+            "Número de Gerações", 10, 5000, 50, 10,
+            help="Quantidade de iterações para evolução do algoritmo."
         )
         mutation_rate = st.slider(
-            "Taxa de Mutação", min_value=0.01, max_value=0.5, step=0.01, value=0.05
+            "Taxa de Mutação", 0.01, 0.5, 0.05, 0.01,
+            help="Frequência de alterações nos indivíduos em cada geração."
         )
-    
+
     with col2:
-        
         initial_population_method = st.selectbox(
-            "Método de Inicialização",
-            ["random", "heuristic"],
-            index=0
+            "Método de Inicialização", ["random", "heuristic"], 0,
+            help="Define como a população inicial será criada."
         )
-        
         selection_method = st.selectbox(
-            "Método de Seleção",
-            ["roulette", "tournament"],
-            index=0
+            "Método de Seleção", ["roulette", "tournament"], 0,
+            help="Como os indivíduos serão escolhidos para reprodução."
         )
-
         mutation_method = st.selectbox(
-            "Método de Mutação",
-            ["swap", "inversion", "substitution"],
-            index=0
+            "Método de Mutação", ["swap", "inversion", "substitution"], 0,
+            help="Tipo de modificação aplicada nos indivíduos."
+        )
+        dynamic_mutation_active = st.checkbox(
+            "Ativar Taxa de Mutação Dinâmica", False,
+            help="Permite ajustar dinamicamente a taxa de mutação."
         )
 
-    dynamic_mutation_active = st.checkbox("Ativar Taxa de Mutação Dinâmica", value=False)
-
-    # Espaço para o gráfico de evolução
     st_placeholder = st.empty()
 
     # Executar o algoritmo genético
@@ -227,7 +173,9 @@ def main():
             initial_population_method=initial_population_method,
             selection_method=selection_method,
             mutation_method=mutation_method,
-            dynamic_mutation_active=dynamic_mutation_active
+            dynamic_mutation_active=dynamic_mutation_active,
+            caminhoes=caminhoes,
+            produtos_amostra=produtos_amostra
         )
 
         # Passar o espaço reservado para atualização do gráfico
@@ -238,9 +186,87 @@ def main():
         st.write("Fitness da Melhor Solução:", best_fitness)
 
         st.subheader("Distribuição de Produtos nos Caminhões")
-        #exibir_distribuicao(caminhoes_utilizados=caminhoes_utilizados)
-        exibir_graficos(caminhoes_utilizados=caminhoes_utilizados)
-        plot_discos_memoria_todos_caminhoes(solution=best_solution, caminhoes=caminhoes_utilizados, produtos_amostra=ag.produtos_amostra)
+        utils.exibir_graficos(caminhoes_utilizados=caminhoes_utilizados)
+        utils.plot_discos_memoria_todos_caminhoes(solution=best_solution, caminhoes=caminhoes_utilizados, produtos_amostra=ag.produtos_amostra)
+
+        st.header("Testes e Resultados")
+
+        # Comparação com métodos convencionais
+        st.subheader("Comparação de Resultados")
+        st.write("""
+        Além do algoritmo genético, testamos o desempenho de um método convencional (heurística gulosa) para resolver o mesmo problema. 
+        Os resultados estão apresentados abaixo.
+        """)
+
+        # Simulação do método convencional
+        resultados_convencionais = heuristica_gulosa(caminhoes, produtos_amostra)
+
+        # Criar DataFrame para os resultados convencionais
+        resultados_convencionais_df = []
+        for caminhao in resultados_convencionais:
+            peso_usado = caminhao["peso_usado"]
+            volume_usado = caminhao["volume_usado"]
+            valor_total = caminhao["valor_total"]
+            
+            resultados_convencionais_df.append({
+                "Caminhão ID": caminhao["id"],
+                "Volume Usado": volume_usado,
+                "Peso Usado": peso_usado,
+                "Valor Total": valor_total,
+            })
+
+        # Exibir os resultados convencionais em um DataFrame
+        st.write("**Resultados do Método Convencional (Heurística Gulosa):**")
+        st.dataframe(pd.DataFrame(resultados_convencionais_df), hide_index=True)
+
+        # Agora, para a solução genérica
+        ids_caminhoes = [caminhao['id'] for caminhao in caminhoes_utilizados]
+        volumes_usados = [caminhao['volume_usado'] for caminhao in caminhoes_utilizados]
+        pesos_usados = [caminhao['peso_usado'] for caminhao in caminhoes_utilizados]
+        valores_totais = [caminhao['valor_total'] for caminhao in caminhoes_utilizados]
+
+
+        # Exibir a melhor solução genérica no formato ajustado
+        df_comparacao_genetico = pd.DataFrame({
+            'Caminhão ID': ids_caminhoes,
+            'Volume Usado': volumes_usados,
+            'Peso Usado': pesos_usados,
+            'Valor Total': valores_totais,
+        })
+
+        st.write("### Melhor Solução Encontrada (Algoritmo Genético):")
+        st.dataframe(df_comparacao_genetico, hide_index=True)
+
+        st.subheader("Conclusão")
+
+        st.write("""
+        Após a execução do algoritmo genético e do método convencional (heurística gulosa), os resultados mostraram diferenças significativas na alocação de produtos nos caminhões.
+        
+        #### 1. Por que os Algoritmos Genéticos se Sobressaíram Nesse Problema?
+
+        Exploração Ampla: Ao contrário da heurística gulosa, que segue um critério fixo, o algoritmo genético explora várias soluções possíveis, permitindo uma melhor adaptação às restrições do problema, como volume e peso.
+
+        Evita Soluções Subótimas: O AG não fica preso a soluções locais, pois gera novas soluções a partir de uma população de candidatos, oferecendo uma chance maior de encontrar a solução ótima.
+
+        Melhor Uso de Recursos: O AG conseguiu otimizar de maneira mais eficiente o uso de recursos (como espaço e peso), resultando em soluções mais equilibradas.
+        
+        #### 2. Motivos dos Zeros no Método Heurístico Guloso
+
+        O método heurístico guloso apresentou resultados com **valor total igual a zero** em alguns caminhões devido a uma combinação de fatores:
+
+        - **Produtos Não Alocados**: Em alguns casos, os produtos não conseguiam ser alocados aos caminhões devido às **restrições de peso** ou **volume**.
+                 Nestes casos, quando o peso ou o volume ultrapassaram dos limites.
+
+        Portanto, enquanto a heurística gulosa é eficiente e rápida, ela não é tão eficaz quanto os algoritmos genéticos em problemas com muitas variáveis e restrições, como no nosso caso.
+        """)
+
+        st.subheader("Como tornar o model mais robusto e realista?")
+        st.write("""
+                 - Inclusão de Novas Variáveis
+                 - Melhor Cálculo de Fatores de Penalidade
+                 - Melhoria nas Operações de Cruzamento e Mutação
+                 - Ajuste do Tamanho da População e Taxas de Mutação
+                 """)
 
 if __name__ == "__main__":
     main()
