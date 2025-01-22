@@ -1,41 +1,10 @@
 # Tech Challenge
 
-## Como iniciar o jupyterlab ?
-
-```
-make docker-start
-```
-
-Acesse a URL: [jupyterlab](http://localhost:8888/)
+Aqui temos os entregaveis dos tech challenges em suas respectivas pastas.
 
 
-## Como para o jupyterlab ?
+### 1 Tech Challenge
+- [1 Tech Challenge](./1%20-%20Tech%20challenge%20)
 
-```
-make docker-stop
-```
-
-
-## Como instalar novas libs ?
-
-```
-poetry add [lib-name]
-```
-
-
-### Não tenho o poetry instalado
-
-```
-Mac os
- -  brew install pipx
-
-Linux
- - sudo apt update
- - sudo apt install pipx
- - pipx ensurepath
-
-Others: [documentação](https://pipx.pypa.io/stable/installation/)
-
-
-pipx install poetry
-```
+### 2 Tech Challenge
+- [2 Tech Challenge](./2%20-%20Tech%20Challenge)
