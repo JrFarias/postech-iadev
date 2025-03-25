@@ -8,3 +8,6 @@ Aqui temos os entregaveis dos tech challenges em suas respectivas pastas.
 
 ### 2 Tech Challenge
 - [2 Tech Challenge](./2_Tech_challenge)
+
+### 3 Tech Challenge
+- [3 Tech Challenge](./3_Tech_Challenge)
