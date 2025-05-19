@@ -63,18 +63,18 @@ def is_hands_up(landmarks):
 
 
 def is_mouth_movements(landmarks, previous_mouth_opening=[0]):
-    mouth_threshold = 0.03
+    mouth_threshold = 0.04
 
     upper_lip = landmarks[13]
     lower_lip = landmarks[14]
     current_mouth_opening = abs(upper_lip.y - lower_lip.y)
 
-    # Detect movement only if the change in mouth opening exceeds the threshold
+    # Detecta movimento apenas se a mudança na abertura da boca exceder o limite
     mouth_movement_detected = (
         abs(current_mouth_opening - previous_mouth_opening[0]) > mouth_threshold
     )
 
-    # Update the previous mouth opening value
+    # Atualiza o valor anterior da abertura da boca
     previous_mouth_opening[0] = current_mouth_opening
 
     return mouth_movement_detected
@@ -92,7 +92,7 @@ def is_blink(landmarks, previous_ear=[0.3]):
     left_eye_indices = [33, 160, 158, 133, 153, 144]
     right_eye_indices = [362, 385, 387, 263, 373, 380]
     ear_threshold = 0.21
-    blink_threshold = 0.05  # Threshold to detect a blink based on EAR change
+    blink_threshold = 0.05  # Limite para detectar um piscar com base na mudança do EAR
 
     left_ear = _eye_aspect_ratio(landmarks, left_eye_indices)
     right_ear = _eye_aspect_ratio(landmarks, right_eye_indices)
@@ -106,3 +106,22 @@ def is_blink(landmarks, previous_ear=[0.3]):
     previous_ear[0] = avg_ear
 
     return blink_detected
+
+
+def is_head_movement(landmarks, previous_nose_position=[None, None], head_movement_threshold=0.02):
+    nose = landmarks[1]
+    
+
+    if previous_nose_position[0] is not None and previous_nose_position[1] is not None:
+        if (
+            abs(nose.x - previous_nose_position[0]) > head_movement_threshold
+            or abs(nose.y - previous_nose_position[1]) > head_movement_threshold
+        ):
+            
+            previous_nose_position[0] = nose.x
+            previous_nose_position[1] = nose.y
+            return True
+
+    previous_nose_position[0] = nose.x
+    previous_nose_position[1] = nose.y
+    return False

@@ -1,20 +1,17 @@
 import cv2
-import json
-import numpy as np
 import mediapipe as mp
 
-from utils import is_blink, analyze_emotions, is_hands_up, is_mouth_movements
+from utils import is_blink, analyze_emotions, is_hands_up, is_mouth_movements, is_head_movement
 
-mp_face_detection = mp.solutions.face_detection
-mp_drawing = mp.solutions.drawing_utils
+
 mp_pose = mp.solutions.pose
 mp_face_mesh = mp.solutions.face_mesh
+mp_drawing = mp.solutions.drawing_utils
+mp_face_detection = mp.solutions.face_detection
+
 
 video_path = "facial_analysis.mp4"
 cap = cv2.VideoCapture(video_path)
-
-# Configura o tempo máximo em segundos do video a ser analisado
-max_seconds = 45
 
 face_detection = mp_face_detection.FaceDetection(
     model_selection=0, min_detection_confidence=0.5
@@ -26,17 +23,6 @@ pose = mp_pose.Pose(
     min_detection_confidence=0.5,
 )
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False, max_num_faces=1)
-
-
-def validate_video_time(frame_count: int) -> bool:
-    fps = cap.get(cv2.CAP_PROP_FPS)
-
-    if frame_count / fps > max_seconds:
-        print("Tempo máximo de execução atingido.")
-        return True
-
-    return False
-
 
 def init_detections(frame):
     # Converter de BGR para RGB e processar
@@ -68,19 +54,13 @@ def main():
         print(f"Erro ao abrir o vídeo: {video_path}")
         return
 
-    # fps = cap.get(cv2.CAP_PROP_FPS)
-    # start_frame = int(fps * 40)  # Calcula o frame inicial para 10 segundos
-    # cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)  # Define o frame inicial
-
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
 
         frame_count += 1
-        # if validate_video_time(frame_count):
-        #     break
-
+    
         ############################## Encontra rosto na imagem #####################################
         face_detection_process, pose_detection, face_mesh_detection, frame = (
             init_detections(frame)
@@ -130,6 +110,17 @@ def main():
                 if is_mouth_movements(landmarks):
                     mouth_movement_count += 1
 
+                if is_head_movement(landmarks):
+                    unknown_positions_count += 1
+            
+                mp_drawing.draw_landmarks(
+                    frame,
+                    face_landmarks,
+                    mp_face_mesh.FACEMESH_TESSELATION,
+                    landmark_drawing_spec=mp_drawing.DrawingSpec(color=(0,255,255), thickness=1, circle_radius=1),
+                    connection_drawing_spec=mp_drawing.DrawingSpec(color=(0,255,0), thickness=1)
+                )
+
         cv2.putText(
             frame,
             f"Levantou as maos: {hands_up_count}",
@@ -158,7 +149,6 @@ def main():
             (255, 189, 22),
             2,
         )
-        # cv2.putText(frame, f"Movimentos de cabeça: {head_movement_count}", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 189, 22), 2)
         cv2.putText(
             frame,
             f"Movimentos desconhecidos: {unknown_positions_count}",
@@ -189,12 +179,19 @@ def main():
         "Total de Frames analisados": frame_count,
         "Levantou as mão acima do olhos": hands_up_count,
         "Emoções encontradas durante a análise": emotions_list,
-        "Movimentos desconhecidos": unknown_positions_count,
         "Piscadas detectadas": blink_count,
         "Movimentos de boca detectados": mouth_movement_count,
+        "Movimentos desconhecidos do rosto": unknown_positions_count,
     }
 
-    print(json.dumps(result, indent=4, ensure_ascii=False))
+    with open("resume.md", "w", encoding="utf-8") as file:
+        file.write("# Resultado da Análise Facial\n\n")
+        file.write("## Resumo\n")
+        for key, value in result.items():
+            if isinstance(value, list):
+                file.write(f"- **{key}:** {', '.join(value)}\n")
+            else:
+                file.write(f"- **{key}:** {value}\n")
 
 
 if __name__ == "__main__":
