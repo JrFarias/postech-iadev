@@ -11,3 +11,6 @@ Aqui temos os entregaveis dos tech challenges em suas respectivas pastas.
 
 ### 3 Tech Challenge
 - [3 Tech Challenge](./3_Tech_Challenge)
+
+### 4 Tech Challenge
+- [4 Tech Challenge](./4_Tech_challenge)
