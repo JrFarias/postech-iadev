@@ -5,3 +5,5 @@ logs.log
 .Trash-*
 .DS_Store
 .ipynb_checkpoints
+resultado_yolo.png
+uploaded_image.png

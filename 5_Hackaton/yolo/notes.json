@@ -1,0 +1,269 @@
+{
+  "categories": [
+    {
+      "id": 0,
+      "name": "AWS API Gateway"
+    },
+    {
+      "id": 1,
+      "name": "AWS Aurora"
+    },
+    {
+      "id": 2,
+      "name": "AWS Auto Scaling"
+    },
+    {
+      "id": 3,
+      "name": "AWS Backup"
+    },
+    {
+      "id": 4,
+      "name": "AWS CloudFormation"
+    },
+    {
+      "id": 5,
+      "name": "AWS CloudFront"
+    },
+    {
+      "id": 6,
+      "name": "AWS CloudTrail"
+    },
+    {
+      "id": 7,
+      "name": "AWS CloudWatch"
+    },
+    {
+      "id": 8,
+      "name": "AWS DynamoDB"
+    },
+    {
+      "id": 9,
+      "name": "AWS EC2"
+    },
+    {
+      "id": 10,
+      "name": "AWS ECS"
+    },
+    {
+      "id": 11,
+      "name": "AWS EFS"
+    },
+    {
+      "id": 12,
+      "name": "AWS EKS"
+    },
+    {
+      "id": 13,
+      "name": "AWS ELB"
+    },
+    {
+      "id": 14,
+      "name": "AWS ElastiCache"
+    },
+    {
+      "id": 15,
+      "name": "AWS Elastic Beanstalk"
+    },
+    {
+      "id": 16,
+      "name": "AWS IAM"
+    },
+    {
+      "id": 17,
+      "name": "AWS KMS"
+    },
+    {
+      "id": 18,
+      "name": "AWS Kinesis"
+    },
+    {
+      "id": 19,
+      "name": "AWS Lambda"
+    },
+    {
+      "id": 20,
+      "name": "AWS NFS"
+    },
+    {
+      "id": 21,
+      "name": "AWS RDS"
+    },
+    {
+      "id": 22,
+      "name": "AWS Redshift"
+    },
+    {
+      "id": 23,
+      "name": "AWS Route 53"
+    },
+    {
+      "id": 24,
+      "name": "AWS S3"
+    },
+    {
+      "id": 25,
+      "name": "AWS SES"
+    },
+    {
+      "id": 26,
+      "name": "AWS SNS"
+    },
+    {
+      "id": 27,
+      "name": "AWS SQS"
+    },
+    {
+      "id": 28,
+      "name": "AWS Sagemaker"
+    },
+    {
+      "id": 29,
+      "name": "AWS Shield"
+    },
+    {
+      "id": 30,
+      "name": "AWS VPC"
+    },
+    {
+      "id": 31,
+      "name": "AWS WAF"
+    },
+    {
+      "id": 32,
+      "name": "Azure API Management"
+    },
+    {
+      "id": 33,
+      "name": "Azure Active Directory"
+    },
+    {
+      "id": 34,
+      "name": "Azure App Service"
+    },
+    {
+      "id": 35,
+      "name": "Azure Backup"
+    },
+    {
+      "id": 36,
+      "name": "Azure Blob Storage"
+    },
+    {
+      "id": 37,
+      "name": "Azure CDN"
+    },
+    {
+      "id": 38,
+      "name": "Azure Cache for Redis"
+    },
+    {
+      "id": 39,
+      "name": "Azure Container Instances (ACI)"
+    },
+    {
+      "id": 40,
+      "name": "Azure Cosmos DB"
+    },
+    {
+      "id": 41,
+      "name": "Azure DDoS Protection"
+    },
+    {
+      "id": 42,
+      "name": "Azure DNS"
+    },
+    {
+      "id": 43,
+      "name": "Azure Database for MySQL"
+    },
+    {
+      "id": 44,
+      "name": "Azure Database for PostgreSQL"
+    },
+    {
+      "id": 45,
+      "name": "Azure Disk Storage"
+    },
+    {
+      "id": 46,
+      "name": "Azure Files"
+    },
+    {
+      "id": 47,
+      "name": "Azure Functions"
+    },
+    {
+      "id": 48,
+      "name": "Azure Key Vault"
+    },
+    {
+      "id": 49,
+      "name": "Azure Kubernetes Service (AKS)"
+    },
+    {
+      "id": 50,
+      "name": "Azure Load Balancer"
+    },
+    {
+      "id": 51,
+      "name": "Azure Monitor"
+    },
+    {
+      "id": 52,
+      "name": "Azure Notification Hubs"
+    },
+    {
+      "id": 53,
+      "name": "Azure Queue Storage"
+    },
+    {
+      "id": 54,
+      "name": "Azure Resource Group"
+    },
+    {
+      "id": 55,
+      "name": "Azure SQL Database"
+    },
+    {
+      "id": 56,
+      "name": "Azure VNet"
+    },
+    {
+      "id": 57,
+      "name": "Azure WAF"
+    },
+    {
+      "id": 58,
+      "name": "Azure logic apps"
+    },
+    {
+      "id": 59,
+      "name": "Azure services"
+    },
+    {
+      "id": 60,
+      "name": "Developer portal"
+    },
+    {
+      "id": 61,
+      "name": "REST"
+    },
+    {
+      "id": 62,
+      "name": "SOAP"
+    },
+    {
+      "id": 63,
+      "name": "Saas services"
+    },
+    {
+      "id": 64,
+      "name": "Usu\u00e1rio"
+    }
+  ],
+  "info": {
+    "year": 2025,
+    "version": "1.0",
+    "contributor": "Label Studio"
+  }
+}

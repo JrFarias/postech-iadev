@@ -1,0 +1,65 @@
+AWS API Gateway
+AWS Aurora
+AWS Auto Scaling
+AWS Backup
+AWS CloudFormation
+AWS CloudFront
+AWS CloudTrail
+AWS CloudWatch
+AWS DynamoDB
+AWS EC2
+AWS ECS
+AWS EFS
+AWS EKS
+AWS ELB
+AWS ElastiCache
+AWS Elastic Beanstalk
+AWS IAM
+AWS KMS
+AWS Kinesis
+AWS Lambda
+AWS NFS
+AWS RDS
+AWS Redshift
+AWS Route 53
+AWS S3
+AWS SES
+AWS SNS
+AWS SQS
+AWS Sagemaker
+AWS Shield
+AWS VPC
+AWS WAF
+Azure API Management
+Azure Active Directory
+Azure App Service
+Azure Backup
+Azure Blob Storage
+Azure CDN
+Azure Cache for Redis
+Azure Container Instances (ACI)
+Azure Cosmos DB
+Azure DDoS Protection
+Azure DNS
+Azure Database for MySQL
+Azure Database for PostgreSQL
+Azure Disk Storage
+Azure Files
+Azure Functions
+Azure Key Vault
+Azure Kubernetes Service (AKS)
+Azure Load Balancer
+Azure Monitor
+Azure Notification Hubs
+Azure Queue Storage
+Azure Resource Group
+Azure SQL Database
+Azure VNet
+Azure WAF
+Azure logic apps
+Azure services
+Developer portal
+REST
+SOAP
+Saas services
+Usuário

@@ -1,0 +1,4 @@
+pillow
+ultralytics
+label-studio
+streamlit
