@@ -1,6 +1,6 @@
 import requests
-from PIL import Image
 
+from PIL import Image
 import streamlit as st
 from ultralytics import YOLO
 
@@ -15,20 +15,20 @@ if uploaded_file is not None:
     img = Image.open(img_path)
     st.image(img, caption="Imagem enviada")
 
-    # Carregar modelo YOLO
+    # Carrega o modelo YOLO
     model = YOLO("./runs/detect/train2/weights/best.pt")
     results = model(img_path)
 
-    # Carregar classes
+    # Carrega as classes
     with open("./yolo/classes.txt", "r", encoding="utf-8") as f:
         classes = [line.strip() for line in f if line.strip()]
 
-    # Salvar imagem com detecções
+    # Salva as imagens com detecções
     result_img_path = "resultado_yolo.png"
     results[0].save(filename=result_img_path)
     st.image(result_img_path, caption="Resultado YOLO")
 
-    # Detectar componentes
+    # Encontra os componentes na imagem
     detected_components = []
     for result in results:
         for box in result.boxes:
@@ -38,7 +38,7 @@ if uploaded_file is not None:
     detected_components = list(dict.fromkeys(detected_components))
     st.write("**Componentes detectados:**", detected_components)
 
-    # Gerar prompt para o Ollama
+    # Prompt para gerar o relatório STRIDE
     prompt = (
         "Gere um Relatório de Modelagem de Ameaças, baseado na metodologia STRIDE,"
         + " para os seguintes componentes de nuvem identificados: "
@@ -51,7 +51,6 @@ if uploaded_file is not None:
         + " uma tabela, com as seguintes colunas: Ameaça, Mitigação"
     )
 
-    # Chamar Ollama
     with st.spinner("Gerando relatório STRIDE com LLM..."):
         ollama_url = "http://localhost:11434/api/generate"
         payload = {
@@ -63,6 +62,12 @@ if uploaded_file is not None:
         result = response.json()
         stride_report = result["response"]
 
-    # Exibir relatório STRIDE
     st.markdown("## Relatório STRIDE")
     st.markdown(stride_report)
+
+    st.download_button(
+        label="Baixar relatório STRIDE em Markdown",
+        data=stride_report,
+        file_name="relatorio_stride.md",
+        mime="text/markdown"
+    )

@@ -15,7 +15,34 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Como rotular imagens com o Label Studio
+## Instale o Ollama
+1. Baixe o servidor Ollama no site oficial: [https://ollama.com/download](https://ollama.com/download)
+
+    ![Exemplo da página de download do Ollama](docs/Ollama-download.png)
+
+2. Após instalar o Ollama, faça o download do modelo Llama 3.2 executando o comando abaixo no terminal:
+
+    ```bash
+    ollama run llama3.2
+    ```
+
+> **Observação:** Certifique-se de que o Ollama está em execução antes de baixar e utilizar o modelo. Consulte a documentação oficial para mais detalhes sobre configuração e uso de modelos adicionais.
+
+## Como executar o projeto
+
+Para iniciar a aplicação, certifique-se de que todas as dependências estão instaladas e o ambiente virtual está ativado. Em seguida, execute o comando abaixo para rodar a interface web:
+
+```bash
+streamlit run application.py
+```
+
+O Streamlit abrirá automaticamente uma nova aba no seu navegador padrão com a interface do projeto. Caso isso não ocorra, acesse manualmente o endereço exibido no terminal (geralmente `http://localhost:8501`).
+
+> **Dica:** Se precisar interromper a aplicação, pressione `Ctrl+C` no terminal.
+
+## Como esse projeto foi realizado
+
+### Label Studio
 
 Para iniciar o Label Studio e rotular suas imagens, execute:
 
@@ -23,13 +50,13 @@ Para iniciar o Label Studio e rotular suas imagens, execute:
 label-studio
 ```
 
-Após rotular, baixe as anotações no formato YOLO conforme mostrado na imagem abaixo:
+Após rotular as imagem corretamente, baixe as anotações no formato YOLO conforme mostrado na imagem abaixo:
 
 ![Como baixar anotações no formato YOLO](docs/label-studio-download.png)
 
 > **Observação:** Após baixar as anotações no formato YOLO, renomeie a pasta exportada para `YOLO` para padronizar o nome do diretório utilizado nos próximos passos.
 
-## Crie o arquivo dataset.yaml
+### Crie o arquivo dataset.yaml
 
 Após exportar as anotações no formato YOLO pelo Label Studio, será gerada uma pasta contendo as imagens e os arquivos de anotação. Para treinar o YOLO, é necessário criar um arquivo `dataset.yaml` apontando para essas pastas.
 
@@ -60,14 +87,14 @@ names: ['classe1', 'classe2']  # substitua pelos nomes reais das classes
 Salve o arquivo como `dataset.yaml` na raiz do seu projeto ou em um local de fácil acesso para o comando de treinamento do YOLO.
 
 
-## Treine o modelo do YOLO após criar o arquivo dataset.yaml
+### Treine o modelo do YOLO após criar o arquivo dataset.yaml
 ```
 yolo detect train data=dataset.yaml model=yolov8m.pt epochs=100 imgsz=800 batch=16 patience=20
 ```
 > **Observação:** Os parâmetros e o modelo utilizados no treinamento devem ser escolhidos pelo usuário conforme as necessidades e características específicas de cada projeto.
 
 
-## Teste o modelo criado para validar se ele esta rotulando as imagens corretamente
+### Teste o modelo criado para validar se ele esta rotulando as imagens corretamente
 ```
 yolo detect predict model=runs/detect/train2/weights/best.pt source=yolo/images save=True
 ```
@@ -76,27 +103,3 @@ Você pode visualizar as imagens de teste processadas pelo modelo na pasta [`run
 
 > **Observação:** Será gerada uma pasta `predict` contendo as imagens processadas a partir do diretório especificado em `source`. Essas imagens estarão rotuladas conforme o modelo treinado, permitindo a validação dos resultados.
 
-## Instale o Ollama
-1. Baixe o servidor Ollama no site oficial: [https://ollama.com/download](https://ollama.com/download)
-
-    ![Exemplo da página de download do Ollama](docs/Ollama-download.png)
-
-2. Após instalar o Ollama, faça o download do modelo Llama 3.2 executando o comando abaixo no terminal:
-
-    ```bash
-    ollama run llama3.2
-    ```
-
-> **Observação:** Certifique-se de que o Ollama está em execução antes de baixar e utilizar o modelo. Consulte a documentação oficial para mais detalhes sobre configuração e uso de modelos adicionais.
-
-## Como executar o projeto
-
-Para iniciar a aplicação, certifique-se de que todas as dependências estão instaladas e o ambiente virtual está ativado. Em seguida, execute o comando abaixo para rodar a interface web:
-
-```bash
-streamlit run application.py
-```
-
-O Streamlit abrirá automaticamente uma nova aba no seu navegador padrão com a interface do projeto. Caso isso não ocorra, acesse manualmente o endereço exibido no terminal (geralmente `http://localhost:8501`).
-
-> **Dica:** Se precisar interromper a aplicação, pressione `Ctrl+C` no terminal.
